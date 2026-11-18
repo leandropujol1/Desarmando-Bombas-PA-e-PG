@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desarme o Sistema: PA & PG</title>
+    <!-- Carregando Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Carregando Fontes Google: JetBrains Mono para números/terminais e Inter para UI -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #090d16;
+            --panel-bg: #111827;
+            --cyan-glow: #06b6d4;
+            --magenta-glow: #d946ef;
+            --amber-glow: #f59e0b;
+            --red-glow: #ef4444;
+            --green-glow: #10b981;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: #f3f4f6;
+            background-image: 
+                radial-gradient(circle at 15% 20%, rgba(6, 182, 212, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 85% 80%, rgba(217, 70, 239, 0.08) 0%, transparent 40%),
+                linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .font-mono-tech {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Efeitos de brilho e bordas tecnológicas */
+        .cyber-card {
+            background: rgba(17, 24, 39, 0.92);
+            border: 1px solid rgba(75, 85, 99, 0.5);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+        }
+
+        .glow-cyan {
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.35);
+            border-color: rgba(6, 182, 212, 0.7);
+        }
+
+        .glow-magenta {
+            box-shadow: 0 0 15px rgba(217, 70, 239, 0.35);
+            border-color: rgba(217, 70, 239, 0.7);
+        }
+
+        .glow-green {
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+            border-color: rgba(16, 185, 129, 0.8);
+        }
+
+        .glow-red {
+            box-shadow: 0 0 18px rgba(239, 68, 68, 0.5);
+            border-color: rgba(239, 68, 68, 0.85);
+        }
+
+        /* Animação de pulso de alerta */
+        @keyframes pulseAlert {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.65; transform: scale(0.98); }
+        }
+        .animate-alert {
+            animation: pulseAlert 1s infinite ease-in-out;
+        }
+
+        /* Animação de tremor ao errar */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+        .animate-shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        /* Estilo dos botões táteis do teclado numérico */
+        .keypad-btn {
+            transition: all 0.1s ease;
+            user-select: none;
+        }
+        .keypad-btn:active {
+            transform: translateY(2px) scale(0.97);
+        }
+
+        /* Remove setas padrão do input number */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center p-3 sm:p-6">
+
+    <!-- Container Principal do Terminal -->
+    <div id="game-container" class="w-full max-w-4xl cyber-card rounded-2xl overflow-hidden transition-all duration-300">
+        
+        <!-- Barra Superior de Status do Sistema -->
+        <header class="bg-gray-950/90 border-b border-gray-800 px-4 py-3 sm:px-6 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div id="status-led" class="w-3.5 h-3.5 rounded-full bg-amber-500 shadow-[0_0_10px_#f59e0b]"></div>
+                <div>
+                    <h1 class="text-sm sm:text-base font-extrabold tracking-wider uppercase text-gray-100 flex items-center gap-2">
+                        <span>PROTOCOLO: DESARME</span>
+                        <span class="text-xs px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-700/50 font-mono-tech">PA & PG</span>
+                    </h1>
+                    <p class="text-[11px] text-gray-400 hidden sm:block">Neutralize as 3 áreas de contenção antes da sobrecarga do núcleo</p>
+                </div>
+            </div>
+
+            <!-- Controles Superiores: Som & Fórmulas -->
+            <div class="flex items-center gap-2">
+                <button id="btn-formulas" onclick="toggleFormulas()" class="px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-cyan-300 border border-cyan-800/60 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                    <span>Fórmulas</span>
+                </button>
+                <button id="btn-sound" onclick="toggleSound()" title="Alternar Som" class="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 transition cursor-pointer">
+                    <svg id="icon-sound-on" class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
+                    <svg id="icon-sound-off" class="w-4 h-4 text-red-400 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"></path></svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Painel Colapsável de Fórmulas de Apoio -->
+        <div id="formulas-drawer" class="hidden bg-gray-900/95 border-b border-cyan-900/60 px-4 py-4 sm:px-6 text-xs sm:text-sm">
+            <div class="flex justify-between items-center mb-3">
+                <span class="font-bold text-cyan-400 uppercase tracking-wider">Manual de Emergência — PA & PG</span>
+                <button onclick="toggleFormulas()" class="text-gray-400 hover:text-white text-xs underline cursor-pointer">Fechar [X]</button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono-tech">
+                <div class="p-3 rounded-xl bg-cyan-950/30 border border-cyan-800/50">
+                    <div class="text-cyan-300 font-bold mb-1">Progressão Aritmética (PA)</div>
+                    <p class="text-gray-300 text-xs mb-1">Soma constante (<span class="text-cyan-400">r</span>) a cada passo:</p>
+                    <div class="text-white bg-gray-950/70 p-2 rounded border border-gray-800 space-y-1 text-xs">
+                        <div>• Razão: <span class="text-cyan-300">r = a₂ - a₁</span></div>
+                        <div>• Termo Geral: <span class="text-cyan-300">aₙ = a₁ + (n - 1) · r</span></div>
+                        <div>• Soma dos n termos: <span class="text-cyan-300">Sₙ = (a₁ + aₙ) · n / 2</span></div>
+                    </div>
+                </div>
+                <div class="p-3 rounded-xl bg-fuchsia-950/30 border border-fuchsia-800/50">
+                    <div class="text-fuchsia-300 font-bold mb-1">Progressão Geométrica (PG)</div>
+                    <p class="text-gray-300 text-xs mb-1">Multiplica constante (<span class="text-fuchsia-400">q</span>) a cada passo:</p>
+                    <div class="text-white bg-gray-950/70 p-2 rounded border border-gray-800 space-y-1 text-xs">
+                        <div>• Razão: <span class="text-fuchsia-300">q = a₂ / a₁</span></div>
+                        <div>• Termo Geral: <span class="text-fuchsia-300">aₙ = a₁ · qⁿ⁻¹</span></div>
+                        <div>• Soma dos n termos: <span class="text-fuchsia-300">Sₙ = a₁ · (qⁿ - 1) / (q - 1)</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TELA 1: INÍCIO / SELEÇÃO DE DIFICULDADE -->
+        <section id="screen-start" class="p-6 sm:p-10 text-center space-y-6">
+            <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-red-500/10 border border-red-500/40 text-red-400 mb-2 shadow-[0_0_30px_rgba(239,68,68,0.2)]">
+                <!-- Ícone SVG de Núcleo / Alerta -->
+                <svg class="w-11 h-11 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+            </div>
+
+            <div class="max-w-xl mx-auto space-y-2">
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">ALERTA DE SOBRECARGA NO REATOR</h2>
+                <p class="text-gray-300 text-sm sm:text-base leading-relaxed">
+                    O sistema de contenção travou! Para evitar a detonação e escapar da sala, você precisa desarmar <strong class="text-cyan-400">3 Áreas de Segurança</strong> resolvendo sequências de <strong class="text-cyan-300">PA</strong> e <strong class="text-fuchsia-400">PG</strong>.
+                </p>
+            </div>
+
+            <!-- Resumo das 3 Áreas -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl mx-auto text-left">
+                <div class="p-3.5 rounded-xl bg-gray-900/90 border border-gray-800">
+                    <div class="text-xs font-mono-tech text-cyan-400 font-bold mb-1">ÁREA 01 // ALFA</div>
+                    <div class="text-sm font-bold text-white">Identificação & Razão</div>
+                    <p class="text-xs text-gray-400 mt-1">Classifique entre PA ou PG e descubra a razão (<span class="font-mono-tech">r</span> ou <span class="font-mono-tech">q</span>).</p>
+                </div>
+                <div class="p-3.5 rounded-xl bg-gray-900/90 border border-gray-800">
+                    <div class="text-xs font-mono-tech text-amber-400 font-bold mb-1">ÁREA 02 // BETA</div>
+                    <div class="text-sm font-bold text-white">Elo Perdido</div>
+                    <p class="text-xs text-gray-400 mt-1">Complete o número oculto no meio ou no fim da sequência.</p>
+                </div>
+                <div class="p-3.5 rounded-xl bg-gray-900/90 border border-gray-800">
+                    <div class="text-xs font-mono-tech text-fuchsia-400 font-bold mb-1">ÁREA 03 // GAMA</div>
+                    <div class="text-sm font-bold text-white">Termo Geral & Soma</div>
+                    <p class="text-xs text-gray-400 mt-1">Calcule termos avançados (<span class="font-mono-tech">a₅, a₆</span>) ou a soma (<span class="font-mono-tech">Sₙ</span>).</p>
+                </div>
+            </div>
+
+            <!-- Escolha de Tempo / Dificuldade -->
+            <div class="max-w-lg mx-auto space-y-3 pt-2">
+                <p class="text-xs uppercase tracking-widest text-gray-400 font-bold">Selecione o Nível de Urgência:</p>
+                <div class="grid grid-cols-3 gap-2.5">
+                    <button onclick="selectDifficulty('facil', 240)" id="diff-facil" class="diff-btn p-3 rounded-xl border border-gray-700 bg-gray-900 hover:border-emerald-500 text-center transition cursor-pointer">
+                        <div class="text-sm font-bold text-emerald-400">Cadete</div>
+                        <div class="text-xs font-mono-tech text-gray-400">04:00 min</div>
+                    </button>
+                    <button onclick="selectDifficulty('normal', 180)" id="diff-normal" class="diff-btn p-3 rounded-xl border-2 border-cyan-500 bg-cyan-950/30 text-center transition cursor-pointer">
+                        <div class="text-sm font-bold text-cyan-300">Agente</div>
+                        <div class="text-xs font-mono-tech text-gray-300">03:00 min</div>
+                    </button>
+                    <button onclick="selectDifficulty('dificil', 120)" id="diff-dificil" class="diff-btn p-3 rounded-xl border border-gray-700 bg-gray-900 hover:border-red-500 text-center transition cursor-pointer">
+                        <div class="text-sm font-bold text-red-400">Especialista</div>
+                        <div class="text-xs font-mono-tech text-gray-400">02:00 min</div>
+                    </button>
+                </div>
+            </div>
+
+            <div class="pt-2">
+                <button onclick="startGame()" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-gray-950 font-extrabold text-base sm:text-lg tracking-wide shadow-[0_0_25px_rgba(6,182,212,0.5)] transition transform hover:-translate-y-0.5 cursor-pointer">
+                    INICIAR DESARME AGORA
+                </button>
+            </div>
+        </section>
+
+        <!-- TELA 2: JOGO ATIVO (PAINEL DE DESARME) -->
+        <section id="screen-game" class="hidden p-4 sm:p-6 space-y-5">
+            
+            <!-- HUD Superior: Cronômetro, Vidas (Integridade) e Progresso das 3 Áreas -->
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center bg-gray-950/80 p-3.5 rounded-xl border border-gray-800">
+                
+                <!-- Cronômetro da Bomba -->
+                <div class="md:col-span-4 flex items-center justify-between md:justify-start gap-3 px-2">
+                    <div class="text-xs uppercase tracking-wider text-gray-400 font-bold">Detonação em:</div>
+                    <div id="timer-display" class="font-mono-tech text-2xl sm:text-3xl font-extrabold text-amber-400 tracking-wider bg-gray-900 px-3 py-1 rounded-lg border border-amber-500/40">
+                        03:00
+                    </div>
+                </div>
+
+                <!-- Indicador Visual das 3 Áreas (Cabos/Travas) -->
+                <div class="md:col-span-5 flex items-center justify-center gap-2">
+                    <div id="area-badge-1" class="flex-1 py-1.5 px-2 rounded-lg border border-cyan-500 bg-cyan-950/40 text-center transition-all">
+                        <div class="text-[10px] font-mono-tech text-cyan-300 font-bold">ÁREA 1</div>
+                        <div id="area-dots-1" class="flex justify-center gap-1 mt-1">
+                            <span class="w-2 h-2 rounded-full bg-gray-600"></span>
+                            <span class="w-2 h-2 rounded-full bg-gray-600"></span>
+                            <span class="w-2 h-2 rounded-full bg-gray-600"></span>
+                        </div>
+                    </div>
+                    <div class="w-3 h-0.5 bg-gray-700" id="wire-1-2"></div>
+                    <div id="area-badge-2" class="flex-1 py-1.5 px-2 rounded-lg border border-gray-800 bg-gray-900/60 text-center opacity-60 transition-all">
+                        <div class="text-[10px] font-mono-tech text-gray-400 font-bold">ÁREA 2</div>
+                        <div id="area-dots-2" class="flex justify-center gap-1 mt-1">
+                            <span class="w-2 h-2 rounded-full bg-gray-700"></span>
+                            <span class="w-2 h-2 rounded-full bg-gray-700"></span>
+                            <span class="w-2 h-2 rounded-full bg-gray-700"></span>
+                        </div>
+                    </div>
+                    <div class="w-3 h-0.5 bg-gray-700" id="wire-2-3"></div>
+                    <div id="area-badge-3" class="flex-1 py-1.5 px-2 rounded-lg border border-gray-800 bg-gray-900/60 text-center opacity-60 transition-all">
+                        <div class="text-[10px] font-mono-tech text-gray-400 font-bold">ÁREA 3</div>
+                        <div id="area-dots-3" class="flex justify-center gap-1 mt-1">
+                            <span class="w-2 h-2 rounded-full bg-gray-700"></span>
+                            <span class="w-2 h-2 rounded-full bg-gray-700"></span>
+                            <span class="w-2 h-2 rounded-full bg-gray-700"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tentativas / Estabilidade do Circuito -->
+                <div class="md:col-span-3 flex items-center justify-between md:justify-end gap-2 px-2">
+                    <span class="text-xs text-gray-400 font-bold uppercase">Erros:</span>
+                    <div id="strikes-container" class="flex gap-1.5">
+                        <span class="w-4 h-4 rounded-sm bg-emerald-500 shadow-[0_0_8px_#10b981] transition-all"></span>
+                        <span class="w-4 h-4 rounded-sm bg-emerald-500 shadow-[0_0_8px_#10b981] transition-all"></span>
+                        <span class="w-4 h-4 rounded-sm bg-emerald-500 shadow-[0_0_8px_#10b981] transition-all"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visor Principal do Desafio Atual -->
+            <div id="challenge-card" class="bg-gray-900/95 border border-gray-700/80 rounded-2xl p-5 sm:p-7 space-y-5 relative overflow-hidden">
+                
+                <!-- Cabeçalho do Módulo -->
+                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-gray-800 pb-3">
+                    <div>
+                        <span id="module-tag" class="text-xs font-mono-tech font-bold uppercase px-2.5 py-1 rounded bg-cyan-950 text-cyan-300 border border-cyan-700/60">
+                            ÁREA 01 // MÓDULO ALFA
+                        </span>
+                        <h3 id="challenge-title" class="text-lg sm:text-xl font-bold text-white mt-2">
+                            Identifique o Tipo de Progressão e a Razão
+                        </h3>
+                    </div>
+                    <div class="text-right font-mono-tech">
+                        <span class="text-xs text-gray-400 block">TRAVA</span>
+                        <span id="lock-counter" class="text-lg font-extrabold text-cyan-400">1 / 3</span>
+                    </div>
+                </div>
+
+                <!-- Display da Sequência Matemática -->
+                <div class="bg-gray-950 border border-gray-800 rounded-xl p-4 sm:p-6 text-center space-y-2 shadow-inner">
+                    <div id="sequence-label" class="text-xs uppercase tracking-widest text-gray-400 font-semibold">
+                        Sequência Capturada pelo Sensor:
+                    </div>
+                    <div id="sequence-display" class="font-mono-tech text-2xl sm:text-4xl font-extrabold text-white tracking-wider py-2 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+                        <!-- Preenchido via JS -->
+                    </div>
+                    <div id="sequence-subtext" class="text-xs sm:text-sm text-gray-400 font-mono-tech">
+                        <!-- Dica contextual -->
+                    </div>
+                </div>
+
+                <!-- Área de Resposta Dinâmica -->
+                <div class="space-y-4">
+                    <!-- Seletor PA ou PG (Aparece apenas nos desafios da Área 1) -->
+                    <div id="type-selector-group" class="hidden space-y-2">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-300 text-center">
+                            1º Passo: Selecione o circuito lógico desta sequência
+                        </label>
+                        <div class="grid grid-cols-2 gap-3 max-w-md mx-auto">
+                            <button type="button" id="btn-type-pa" onclick="selectProgType('PA')" class="py-3 px-4 rounded-xl border border-gray-700 bg-gray-800/80 hover:border-cyan-400 font-bold text-sm sm:text-base text-gray-200 transition cursor-pointer flex items-center justify-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>
+                                <span>PA (Soma)</span>
+                            </button>
+                            <button type="button" id="btn-type-pg" onclick="selectProgType('PG')" class="py-3 px-4 rounded-xl border border-gray-700 bg-gray-800/80 hover:border-fuchsia-400 font-bold text-sm sm:text-base text-gray-200 transition cursor-pointer flex items-center justify-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-fuchsia-400"></span>
+                                <span>PG (Multiplica)</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Campo Numérico + Teclado Digital -->
+                    <div class="max-w-md mx-auto space-y-3">
+                        <label id="input-label" for="answer-input" class="block text-xs font-bold uppercase tracking-wider text-gray-300 text-center">
+                            Digite o valor numérico:
+                        </label>
+                        
+                        <div class="flex gap-2">
+                            <input type="text" inputmode="numeric" id="answer-input" autocomplete="off" placeholder="?" 
+                                class="w-full font-mono-tech text-center text-2xl sm:text-3xl font-extrabold bg-gray-950 border-2 border-gray-700 focus:border-cyan-400 focus:outline-none rounded-xl py-3 px-4 text-white tracking-widest">
+                            <button type="button" onclick="submitAnswer()" class="px-5 sm:px-6 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-extrabold text-sm sm:text-base uppercase tracking-wider shadow-[0_0_15px_rgba(16,185,129,0.4)] transition cursor-pointer">
+                                Validar
+                            </button>
+                        </div>
+
+                        <!-- Teclado Numérico Compacto (Ótimo para celular e cliques rápidos) -->
+                        <div class="grid grid-cols-6 gap-1.5 pt-1 font-mono-tech">
+                            <button type="button" onclick="appendDigit('1')" class="keypad-btn py-2.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-white font-bold border border-gray-700 cursor-pointer">1</button>
+                            <button type="button" onclick="appendDigit('2')" class="keypad-btn py-2.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-white font-bold border border-gray-700 cursor-pointer">2</button>
+                            <button type="button" onclick="appendDigit('3')" class="keypad-btn py-2.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-white font-bold border border-gray-700 cursor-pointer">3</button>
+                            <button type="button" onclick="appendDigit('4')" class="keypad-btn py-2.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-white font-bold border border-gray-700 cursor-pointer">4</button>
+                            <button type="button" onclick="appendDigit('5')" class="keypad-btn py-2.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-white font-bold border border-gray-700 cursor-pointer">5</button>
+                            <button type="button" onclick="toggleNegative()" class="keypad-btn py-2.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-amber-400 font-bold border border-gray-700 cursor-pointer" title="Sinal Negativo">+/-</button>
+                            
+                            <button type="button" onclick="appendDigit('6')" class="keypad-btn py-2.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-white font-bold border border-gray-700 cursor-pointer">6</button>
+                            <button type="button" onclick="appendDigit('7')" class="keypad-btn py-2.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-white font-bold border border-gray-700 cursor-pointer">7</button>
+                            <button type="button" onclick="appendDigit('8')" class="keypad-btn py-2.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-white font-bold border border-gray-700 cursor-pointer">8</button>
+                            <button type="button" onclick="appendDigit('9')" class="keypad-btn py-2.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-white font-bold border border-gray-700 cursor-pointer">9</button>
+                            <button type="button" onclick="appendDigit('0')" class="keypad-btn py-2.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-white font-bold border border-gray-700 cursor-pointer">0</button>
+                            <button type="button" onclick="clearInput()" class="keypad-btn py-2.5 rounded-lg bg-red-950/70 hover:bg-red-900/80 text-red-300 font-bold border border-red-800/60 text-xs cursor-pointer">LIMPAR</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Caixa de Feedback Instantâneo (Explicação Educativa) -->
+                <div id="feedback-box" class="hidden rounded-xl p-3.5 text-sm font-medium border transition-all">
+                    <!-- Preenchido via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- TELA 3: RESULTADO FINAL (VITÓRIA OU DERROTA) -->
+        <section id="screen-end" class="hidden p-6 sm:p-10 text-center space-y-6">
+            <div id="end-icon-container" class="inline-flex items-center justify-center w-20 h-20 rounded-2xl mx-auto">
+                <!-- Ícone dinâmico -->
+            </div>
+
+            <div class="space-y-2 max-w-lg mx-auto">
+                <h2 id="end-title" class="text-2xl sm:text-4xl font-extrabold tracking-tight"></h2>
+                <p id="end-subtitle" class="text-gray-300 text-sm sm:text-base"></p>
+            </div>
+
+            <!-- Estatísticas da Partida -->
+            <div class="grid grid-cols-3 gap-3 max-w-lg mx-auto font-mono-tech">
+                <div class="p-3.5 rounded-xl bg-gray-900 border border-gray-800">
+                    <div class="text-xs text-gray-400">ÁREAS</div>
+                    <div id="stat-areas" class="text-xl sm:text-2xl font-extrabold text-cyan-400 mt-1">3/3</div>
+                </div>
+                <div class="p-3.5 rounded-xl bg-gray-900 border border-gray-800">
+                    <div class="text-xs text-gray-400">TEMPO REST.</div>
+                    <div id="stat-time" class="text-xl sm:text-2xl font-extrabold text-emerald-400 mt-1">01:45</div>
+                </div>
+                <div class="p-3.5 rounded-xl bg-gray-900 border border-gray-800">
+                    <div class="text-xs text-gray-400">PRECISÃO</div>
+                    <div id="stat-accuracy" class="text-xl sm:text-2xl font-extrabold text-amber-400 mt-1">100%</div>
+                </div>
+            </div>
+
+            <!-- Revisão caso tenha perdido -->
+            <div id="end-lesson-box" class="hidden max-w-lg mx-auto p-4 rounded-xl bg-gray-900/90 border border-gray-700 text-left text-xs sm:text-sm text-gray-300 space-y-1">
+                <div class="font-bold text-amber-400 uppercase text-xs">Último Desafio Pendente:</div>
+                <div id="end-lesson-text"></div>
+            </div>
+
+            <div class="pt-3 flex flex-col sm:flex-row items-center justify-center gap-3">
+                <button onclick="startGame()" class="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-gray-950 font-extrabold text-sm sm:text-base shadow-[0_0_20px_rgba(6,182,212,0.4)] transition cursor-pointer">
+                    Jogar Novamente (Novos Desafios)
+                </button>
+                <button onclick="returnToMenu()" class="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-200 font-bold text-sm border border-gray-700 transition cursor-pointer">
+                    Alterar Dificuldade
+                </button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        /* ==========================================================================
+           SISTEMA DE ÁUDIO SINTETIZADO (Web Audio API - Sem arquivos externos)
+           ========================================================================== */
+        class SoundFX {
+            constructor() {
+                this.ctx = null;
+                this.muted = false;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContext) {
+                        this.ctx = new AudioContext();
+                    }
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            playTone(freq, type, duration, vol = 0.12, delay = 0) {
+                if (this.muted) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, this.ctx.currentTime + delay);
+
+                gain.gain.setValueAtTime(vol, this.ctx.currentTime + delay);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + delay + duration);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start(this.ctx.currentTime + delay);
+                osc.stop(this.ctx.currentTime + delay + duration);
+            }
+
+            click() {
+                this.playTone(680, 'sine', 0.06, 0.08);
+            }
+
+            tick(urgent = false) {
+                this.playTone(urgent ? 950 : 520, 'triangle', 0.04, urgent ? 0.09 : 0.03);
+            }
+
+            successLock() {
+                this.playTone(523.25, 'sine', 0.12, 0.12, 0);      // C5
+                this.playTone(659.25, 'sine', 0.18, 0.12, 0.09);   // E5
+            }
+
+            areaCleared() {
+                this.playTone(523.25, 'triangle', 0.15, 0.15, 0);
+                this.playTone(659.25, 'triangle', 0.15, 0.15, 0.1);
+                this.playTone(783.99, 'triangle', 0.25, 0.15, 0.2);
+                this.playTone(1046.50, 'sine', 0.35, 0.15, 0.32);
+            }
+
+            error() {
+                this.playTone(160, 'sawtooth', 0.22, 0.14, 0);
+                this.playTone(130, 'sawtooth', 0.28, 0.14, 0.12);
+            }
+
+            victory() {
+                const notes = [523.25, 659.25, 783.99, 1046.50, 783.99, 1046.50];
+                notes.forEach((n, i) => {
+                    this.playTone(n, 'triangle', 0.2, 0.15, i * 0.13);
+                });
+            }
+
+            explosion() {
+                this.playTone(110, 'sawtooth', 0.6, 0.2, 0);
+                this.playTone(75, 'square', 0.7, 0.2, 0.1);
+            }
+        }
+
+        const sfx = new SoundFX();
+
+        /* ==========================================================================
+           ESTADO DO JOGO E CONFIGURAÇÕES
+           ========================================================================== */
+        const state = {
+            difficulty: 'normal',
+            initialTime: 180,
+            timeLeft: 180,
+            timerInterval: null,
+            currentArea: 1,        // 1 a 3
+            currentLock: 1,        // 1 a 3 por área (Total: 9 desafios)
+            strikes: 0,
+            maxStrikes: 3,
+            totalAttempts: 0,
+            correctAnswers: 0,
+            selectedProgType: null, // 'PA' ou 'PG' (usado na Área 1)
+            currentChallenge: null,
+            isTransitioning: false
+        };
+
+        /* ==========================================================================
+           GERADOR PROCEDURAL DE DESAFIOS DE PA E PG
+           ========================================================================== */
+        function randInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function generateChallenge(area, lock) {
+            // Alterna ou sorteia entre PA e PG de forma equilibrada
+            const isPA = Math.random() < 0.5;
+            const progType = isPA ? 'PA' : 'PG';
+
+            if (area === 1) {
+                // ÁREA 1: Identificar se é PA ou PG e calcular a razão (r ou q)
+                if (isPA) {
+                    const a1 = randInt(-8, 15);
+                    let r = randInt(-7, 9);
+                    if (r === 0) r = 4; // Evita razão 0
+                    const seq = [a1, a1 + r, a1 + 2 * r, a1 + 3 * r];
+                    return {
+                        area: 1,
+                        type: progType,
+                        requireTypeSelection: true,
+                        title: 'Classifique a Progressão e Informe a Razão (r ou q)',
+                        sequenceHTML: seq.map(n => `<span class="px-3 py-1 rounded-lg bg-gray-900 border border-gray-800">${n}</span>`).join('<span class="text-gray-600">,</span>'),
+                        subtext: 'Observe se a sequência soma ou multiplica um valor constante.',
+                        inputLabel: 'Valor da razão (r ou q):',
+                        answer: r,
+                        explanation: `É uma PA (Progressão Aritmética) pois soma ${r > 0 ? '+' + r : r} a cada termo. Logo, r = ${r}.`
+                    };
+                } else {
+                    const a1 = randInt(1, 5) * (Math.random() < 0.25 ? -1 : 1);
+                    const qOptions = [2, 3, 4, -2];
+                    const q = qOptions[randInt(0, qOptions.length - 1)];
+                    const seq = [a1, a1 * q, a1 * q * q, a1 * q * q * q];
+                    return {
+                        area: 1,
+                        type: progType,
+                        requireTypeSelection: true,
+                        title: 'Classifique a Progressão e Informe a Razão (r ou q)',
+                        sequenceHTML: seq.map(n => `<span class="px-3 py-1 rounded-lg bg-gray-900 border border-gray-800">${n}</span>`).join('<span class="text-gray-600">,</span>'),
+                        subtext: 'Observe se a sequência soma ou multiplica um valor constante.',
+                        inputLabel: 'Valor da razão (r ou q):',
+                        answer: q,
+                        explanation: `É uma PG (Progressão Geométrica) pois multiplica por ${q} a cada passo. Logo, q = ${q}.`
+                    };
+                }
+            } 
+            else if (area === 2) {
+                // ÁREA 2: Descobrir o Termo Faltante na sequência (posição 2, 3 ou 4)
+                const missingIdx = randInt(1, 3); // Índice 1, 2 ou 3 (2º, 3º ou 4º termo)
+                if (isPA) {
+                    const a1 = randInt(2, 20);
+                    let r = randInt(-6, 8);
+                    if (r === 0) r = 5;
+                    const seq = [a1, a1 + r, a1 + 2 * r, a1 + 3 * r];
+                    const ans = seq[missingIdx];
+                    const seqHTML = seq.map((n, idx) => {
+                        if (idx === missingIdx) {
+                            return `<span class="px-3.5 py-1 rounded-lg bg-cyan-950/80 border-2 border-cyan-400 text-cyan-300 animate-pulse">[ ? ]</span>`;
+                        }
+                        return `<span class="px-3 py-1 rounded-lg bg-gray-900 border border-gray-800">${n}</span>`;
+                    }).join('<span class="text-gray-600">,</span>');
+
+                    return {
+                        area: 2,
+                        type: 'PA',
+                        requireTypeSelection: false,
+                        title: 'Restaure o Termo Faltante da PA',
+                        sequenceHTML: seqHTML,
+                        subtext: `Circuito identificado: Progressão Aritmética (PA).`,
+                        inputLabel: 'Valor do termo oculto [ ? ]:',
+                        answer: ans,
+                        explanation: `Nesta PA, a razão é r = ${r}. Aplicando o passo constante, o termo faltante é ${ans}.`
+                    };
+                } else {
+                    const a1 = randInt(1, 4);
+                    const q = randInt(2, 4);
+                    const seq = [a1, a1 * q, a1 * q * q, a1 * q * q * q];
+                    const ans = seq[missingIdx];
+                    const seqHTML = seq.map((n, idx) => {
+                        if (idx === missingIdx) {
+                            return `<span class="px-3.5 py-1 rounded-lg bg-fuchsia-950/80 border-2 border-fuchsia-400 text-fuchsia-300 animate-pulse">[ ? ]</span>`;
+                        }
+                        return `<span class="px-3 py-1 rounded-lg bg-gray-900 border border-gray-800">${n}</span>`;
+                    }).join('<span class="text-gray-600">,</span>');
+
+                    return {
+                        area: 2,
+                        type: 'PG',
+                        requireTypeSelection: false,
+                        title: 'Restaure o Termo Faltante da PG',
+                        sequenceHTML: seqHTML,
+                        subtext: `Circuito identificado: Progressão Geométrica (PG).`,
+                        inputLabel: 'Valor do termo oculto [ ? ]:',
+                        answer: ans,
+                        explanation: `Nesta PG, cada termo é multiplicado por q = ${q}. O termo faltante é ${ans}.`
+                    };
+                }
+            } 
+            else {
+                // ÁREA 3: Termo Geral (a_n) ou Soma dos primeiros termos (S_n)
+                const isSumChallenge = (lock === 3); // O último desafio da área 3 pede a Soma!
+
+                if (!isSumChallenge) {
+                    // Calcular o n-ésimo termo (a_5 ou a_6)
+                    if (isPA) {
+                        const a1 = randInt(2, 12);
+                        const r = randInt(2, 7);
+                        const n = randInt(5, 7);
+                        const an = a1 + (n - 1) * r;
+                        return {
+                            area: 3,
+                            type: 'PA',
+                            requireTypeSelection: false,
+                            title: `Calcule o ${n}º Termo (a${n}) desta PA`,
+                            sequenceHTML: `<div class="text-lg sm:text-2xl text-cyan-300">a₁ = ${a1} &nbsp;|&nbsp; r = ${r} &nbsp;|&nbsp; n = ${n}</div>`,
+                            subtext: `Fórmula: aₙ = a₁ + (n - 1) · r`,
+                            inputLabel: `Valor de a${n}:`,
+                            answer: an,
+                            explanation: `a${n} = ${a1} + (${n} - 1) · ${r} = ${a1} + ${(n - 1) * r} = ${an}.`
+                        };
+                    } else {
+                        const a1 = randInt(1, 3);
+                        const q = randInt(2, 3);
+                        const n = randInt(4, 5);
+                        const an = a1 * Math.pow(q, n - 1);
+                        return {
+                            area: 3,
+                            type: 'PG',
+                            requireTypeSelection: false,
+                            title: `Calcule o ${n}º Termo (a${n}) desta PG`,
+                            sequenceHTML: `<div class="text-lg sm:text-2xl text-fuchsia-300">a₁ = ${a1} &nbsp;|&nbsp; q = ${q} &nbsp;|&nbsp; n = ${n}</div>`,
+                            subtext: `Fórmula: aₙ = a₁ · qⁿ⁻¹`,
+                            inputLabel: `Valor de a${n}:`,
+                            answer: an,
+                            explanation: `a${n} = ${a1} · ${q}^(${n}-1) = ${a1} · ${Math.pow(q, n - 1)} = ${an}.`
+                        };
+                    }
+                } else {
+                    // Desafio Final do Reator: Soma dos 4 primeiros termos (S_4)
+                    if (isPA) {
+                        const a1 = randInt(2, 8);
+                        const r = randInt(2, 5);
+                        const n = 4;
+                        const a4 = a1 + 3 * r;
+                        const sum = ((a1 + a4) * n) / 2;
+                        return {
+                            area: 3,
+                            type: 'PA',
+                            requireTypeSelection: false,
+                            title: 'TRAVA FINAL: Calcule a Soma (S₄) desta PA',
+                            sequenceHTML: `<div class="text-lg sm:text-2xl text-cyan-300">(${a1}, ${a1 + r}, ${a1 + 2 * r}, ${a4})</div>`,
+                            subtext: `Some os 4 termos da PA acima para liberar o núcleo.`,
+                            inputLabel: 'Soma total (S₄):',
+                            answer: sum,
+                            explanation: `S₄ = (${a1} + ${a4}) · 4 / 2 = ${a1 + a4} · 2 = ${sum}.`
+                        };
+                    } else {
+                        const a1 = randInt(1, 3);
+                        const q = 2;
+                        const seq = [a1, a1 * 2, a1 * 4, a1 * 8];
+                        const sum = seq.reduce((acc, v) => acc + v, 0);
+                        return {
+                            area: 3,
+                            type: 'PG',
+                            requireTypeSelection: false,
+                            title: 'TRAVA FINAL: Calcule a Soma (S₄) desta PG',
+                            sequenceHTML: `<div class="text-lg sm:text-2xl text-fuchsia-300">(${seq.join(', ')})</div>`,
+                            subtext: `Some os 4 termos da PG acima para liberar o núcleo.`,
+                            inputLabel: 'Soma total (S₄):',
+                            answer: sum,
+                            explanation: `S₄ = ${seq.join(' + ')} = ${sum}.`
+                        };
+                    }
+                }
+            }
+        }
+
+        /* ==========================================================================
+           CONTROLE DE TELAS E INTERFACE
+           ========================================================================== */
+        function selectDifficulty(level, seconds) {
+            sfx.click();
+            state.difficulty = level;
+            state.initialTime = seconds;
+
+            document.querySelectorAll('.diff-btn').forEach(btn => {
+                btn.classList.remove('border-2', 'border-cyan-500', 'bg-cyan-950/30');
+                btn.classList.add('border', 'border-gray-700', 'bg-gray-900');
+            });
+
+            const activeBtn = document.getElementById(`diff-${level}`);
+            activeBtn.classList.remove('border', 'border-gray-700', 'bg-gray-900');
+            activeBtn.classList.add('border-2', 'border-cyan-500', 'bg-cyan-950/30');
+        }
+
+        function toggleFormulas() {
+            sfx.click();
+            const drawer = document.getElementById('formulas-drawer');
+            drawer.classList.toggle('hidden');
+        }
+
+        function toggleSound() {
+            sfx.muted = !sfx.muted;
+            document.getElementById('icon-sound-on').classList.toggle('hidden', sfx.muted);
+            document.getElementById('icon-sound-off').classList.toggle('hidden', !sfx.muted);
+            if (!sfx.muted) sfx.click();
+        }
+
+        function formatTime(secs) {
+            const m = Math.floor(secs / 60).toString().padStart(2, '0');
+            const s = (secs % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        function startGame() {
+            sfx.init();
+            sfx.click();
+
+            // Reseta estado
+            state.timeLeft = state.initialTime;
+            state.currentArea = 1;
+            state.currentLock = 1;
+            state.strikes = 0;
+            state.totalAttempts = 0;
+            state.correctAnswers = 0;
+            state.selectedProgType = null;
+            state.isTransitioning = false;
+
+            // Alterna telas
+            document.getElementById('screen-start').classList.add('hidden');
+            document.getElementById('screen-end').classList.add('hidden');
+            document.getElementById('screen-game').classList.remove('hidden');
+
+            document.getElementById('status-led').className = 'w-3.5 h-3.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_12px_#ef4444]';
+
+            updateHUD();
+            loadNextChallenge();
+            startTimer();
+        }
+
+        function returnToMenu() {
+            sfx.click();
+            clearInterval(state.timerInterval);
+            document.getElementById('screen-game').classList.add('hidden');
+            document.getElementById('screen-end').classList.add('hidden');
+            document.getElementById('screen-start').classList.remove('hidden');
+            document.getElementById('status-led').className = 'w-3.5 h-3.5 rounded-full bg-amber-500 shadow-[0_0_10px_#f59e0b]';
+        }
+
+        function startTimer() {
+            clearInterval(state.timerInterval);
+            updateTimerDisplay();
+
+            state.timerInterval = setInterval(() => {
+                state.timeLeft--;
+                updateTimerDisplay();
+
+                if (state.timeLeft <= 15 && state.timeLeft > 0) {
+                    sfx.tick(true);
+                } else if (state.timeLeft > 0) {
+                    sfx.tick(false);
+                }
+
+                if (state.timeLeft <= 0) {
+                    clearInterval(state.timerInterval);
+                    endGame(false, 'TEMPO ESGOTADO! O núcleo atingiu massa crítica antes do desarme.');
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const el = document.getElementById('timer-display');
+            el.textContent = formatTime(Math.max(0, state.timeLeft));
+
+            if (state.timeLeft <= 20) {
+                el.className = 'font-mono-tech text-2xl sm:text-3xl font-extrabold text-red-400 tracking-wider bg-red-950/60 px-3 py-1 rounded-lg border border-red-500 animate-alert';
+            } else {
+                el.className = 'font-mono-tech text-2xl sm:text-3xl font-extrabold text-amber-400 tracking-wider bg-gray-900 px-3 py-1 rounded-lg border border-amber-500/40';
+            }
+        }
+
+        function updateHUD() {
+            // Atualiza indicadores das 3 Áreas
+            for (let a = 1; a <= 3; a++) {
+                const badge = document.getElementById(`area-badge-${a}`);
+                const dots = document.getElementById(`area-dots-${a}`).children;
+
+                if (a < state.currentArea) {
+                    // Área já desarmada
+                    badge.className = 'flex-1 py-1.5 px-2 rounded-lg border border-emerald-500 bg-emerald-950/40 text-center transition-all glow-green';
+                    badge.firstElementChild.className = 'text-[10px] font-mono-tech text-emerald-300 font-bold';
+                    for (let d = 0; d < 3; d++) {
+                        dots[d].className = 'w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#10b981]';
+                    }
+                } else if (a === state.currentArea) {
+                    // Área atual
+                    badge.className = 'flex-1 py-1.5 px-2 rounded-lg border border-cyan-500 bg-cyan-950/40 text-center transition-all glow-cyan';
+                    badge.firstElementChild.className = 'text-[10px] font-mono-tech text-cyan-300 font-bold';
+                    for (let d = 0; d < 3; d++) {
+                        if (d < state.currentLock - 1) {
+                            dots[d].className = 'w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#10b981]';
+                        } else if (d === state.currentLock - 1) {
+                            dots[d].className = 'w-2 h-2 rounded-full bg-amber-400 animate-ping';
+                        } else {
+                            dots[d].className = 'w-2 h-2 rounded-full bg-gray-600';
+                        }
+                    }
+                } else {
+                    // Área bloqueada futura
+                    badge.className = 'flex-1 py-1.5 px-2 rounded-lg border border-gray-800 bg-gray-900/60 text-center opacity-50 transition-all';
+                    badge.firstElementChild.className = 'text-[10px] font-mono-tech text-gray-400 font-bold';
+                    for (let d = 0; d < 3; d++) {
+                        dots[d].className = 'w-2 h-2 rounded-full bg-gray-700';
+                    }
+                }
+            }
+
+            // Atualiza fios conectores
+            document.getElementById('wire-1-2').className = state.currentArea > 1 ? 'w-3 h-0.5 bg-emerald-500' : 'w-3 h-0.5 bg-gray-700';
+            document.getElementById('wire-2-3').className = state.currentArea > 2 ? 'w-3 h-0.5 bg-emerald-500' : 'w-3 h-0.5 bg-gray-700';
+
+            // Atualiza vidas/erros
+            const strikeBoxes = document.getElementById('strikes-container').children;
+            const remainingLives = state.maxStrikes - state.strikes;
+            for (let i = 0; i < 3; i++) {
+                if (i < remainingLives) {
+                    strikeBoxes[i].className = 'w-4 h-4 rounded-sm bg-emerald-500 shadow-[0_0_8px_#10b981] transition-all';
+                } else {
+                    strikeBoxes[i].className = 'w-4 h-4 rounded-sm bg-red-600 shadow-[0_0_8px_#ef4444] transition-all';
+                }
+            }
+        }
+
+        function loadNextChallenge() {
+            state.currentChallenge = generateChallenge(state.currentArea, state.currentLock);
+            state.selectedProgType = null;
+            state.isTransitioning = false;
+
+            const c = state.currentChallenge;
+            const areaNames = {
+                1: 'ÁREA 01 // MÓDULO ALFA',
+                2: 'ÁREA 02 // MÓDULO BETA',
+                3: 'ÁREA 03 // MÓDULO GAMA'
+            };
+
+            document.getElementById('module-tag').textContent = areaNames[state.currentArea];
+            document.getElementById('challenge-title').textContent = c.title;
+            document.getElementById('lock-counter').textContent = `${state.currentLock} / 3`;
+            document.getElementById('sequence-display').innerHTML = c.sequenceHTML;
+            document.getElementById('sequence-subtext').textContent = c.subtext;
+            document.getElementById('input-label').textContent = c.inputLabel;
+
+            // Mostra ou esconde botões PA / PG
+            const typeGroup = document.getElementById('type-selector-group');
+            if (c.requireTypeSelection) {
+                typeGroup.classList.remove('hidden');
+                resetTypeButtons();
+            } else {
+                typeGroup.classList.add('hidden');
+            }
+
+            // Limpa input e feedback
+            const inputEl = document.getElementById('answer-input');
+            inputEl.value = '';
+            inputEl.focus();
+
+            const fb = document.getElementById('feedback-box');
+            fb.classList.add('hidden');
+        }
+
+        /* ==========================================================================
+           CONTROLES DE ENTRADA (TECLADO VIRTUAL E FÍSICO)
+           ========================================================================== */
+        function resetTypeButtons() {
+            const btnPa = document.getElementById('btn-type-pa');
+            const btnPg = document.getElementById('btn-type-pg');
+            btnPa.className = 'py-3 px-4 rounded-xl border border-gray-700 bg-gray-800/80 hover:border-cyan-400 font-bold text-sm sm:text-base text-gray-200 transition cursor-pointer flex items-center justify-center gap-2';
+            btnPg.className = 'py-3 px-4 rounded-xl border border-gray-700 bg-gray-800/80 hover:border-fuchsia-400 font-bold text-sm sm:text-base text-gray-200 transition cursor-pointer flex items-center justify-center gap-2';
+        }
+
+        function selectProgType(type) {
+            sfx.click();
+            state.selectedProgType = type;
+            resetTypeButtons();
+
+            if (type === 'PA') {
+                const btnPa = document.getElementById('btn-type-pa');
+                btnPa.className = 'py-3 px-4 rounded-xl border-2 border-cyan-400 bg-cyan-950/60 font-bold text-sm sm:text-base text-cyan-200 glow-cyan transition cursor-pointer flex items-center justify-center gap-2';
+            } else {
+                const btnPg = document.getElementById('btn-type-pg');
+                btnPg.className = 'py-3 px-4 rounded-xl border-2 border-fuchsia-400 bg-fuchsia-950/60 font-bold text-sm sm:text-base text-fuchsia-200 glow-magenta transition cursor-pointer flex items-center justify-center gap-2';
+            }
+        }
+
+        function appendDigit(digit) {
+            if (state.isTransitioning) return;
+            sfx.click();
+            const input = document.getElementById('answer-input');
+            if (input.value.length < 8) {
+                input.value += digit;
+            }
+        }
+
+        function toggleNegative() {
+            if (state.isTransitioning) return;
+            sfx.click();
+            const input = document.getElementById('answer-input');
+            if (input.value.startsWith('-')) {
+                input.value = input.value.slice(1);
+            } else {
+                input.value = '-' + input.value;
+            }
+        }
+
+        function clearInput() {
+            if (state.isTransitioning) return;
+            sfx.click();
+            document.getElementById('answer-input').value = '';
+            document.getElementById('answer-input').focus();
+        }
+
+        // Suporte à tecla Enter no teclado físico
+        document.getElementById('answer-input').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                submitAnswer();
+            }
+        });
+
+        /* ==========================================================================
+           VALIDAÇÃO DE RESPOSTA E PROGRESSÃO
+           ========================================================================== */
+        function showFeedback(isSuccess, message) {
+            const fb = document.getElementById('feedback-box');
+            fb.classList.remove('hidden', 'bg-emerald-950/80', 'border-emerald-500', 'text-emerald-200', 'bg-red-950/80', 'border-red-500', 'text-red-200');
+
+            if (isSuccess) {
+                fb.classList.add('bg-emerald-950/80', 'border-emerald-500', 'text-emerald-200');
+                fb.innerHTML = `<div class="flex items-start gap-2"><span class="font-bold text-emerald-400">✔ TRAVA LIBERADA:</span><span>${message}</span></div>`;
+            } else {
+                fb.classList.add('bg-red-950/80', 'border-red-500', 'text-red-200');
+                fb.innerHTML = `<div class="flex items-start gap-2"><span class="font-bold text-red-400">✖ FALHA DE CIRCUITO:</span><span>${message}</span></div>`;
+            }
+        }
+
+        function submitAnswer() {
+            if (state.isTransitioning) return;
+
+            const c = state.currentChallenge;
+            const rawVal = document.getElementById('answer-input').value.trim();
+
+            // Verifica se selecionou PA/PG quando obrigatório
+            if (c.requireTypeSelection && !state.selectedProgType) {
+                sfx.error();
+                showFeedback(false, 'Selecione primeiro se a sequência é PA ou PG nos botões acima.');
+                return;
+            }
+
+            // Verifica se digitou um número válido
+            const numVal = Number(rawVal);
+            if (rawVal === '' || isNaN(numVal)) {
+                sfx.error();
+                showFeedback(false, 'Insira um valor numérico válido antes de validar.');
+                return;
+            }
+
+            state.totalAttempts++;
+
+            const typeCorrect = !c.requireTypeSelection || (state.selectedProgType === c.type);
+            const valueCorrect = (numVal === c.answer);
+
+            if (typeCorrect && valueCorrect) {
+                // ACERTOU!
+                state.correctAnswers++;
+                state.isTransitioning = true;
+                showFeedback(true, c.explanation);
+
+                if (state.currentLock < 3) {
+                    sfx.successLock();
+                    state.currentLock++;
+                    updateHUD();
+                    setTimeout(() => {
+                        loadNextChallenge();
+                    }, 1250);
+                } else {
+                    // Completou as 3 travas da Área atual!
+                    if (state.currentArea < 3) {
+                        sfx.areaCleared();
+                        state.currentArea++;
+                        state.currentLock = 1;
+                        updateHUD();
+                        setTimeout(() => {
+                            loadNextChallenge();
+                        }, 1500);
+                    } else {
+                        // DESARMOU TODAS AS 3 ÁREAS! VITÓRIA!
+                        clearInterval(state.timerInterval);
+                        sfx.victory();
+                        setTimeout(() => {
+                            endGame(true, 'Todas as 3 Áreas de Segurança foram neutralizadas. O núcleo está estável e você sobreviveu!');
+                        }, 1200);
+                    }
+                }
+            } else {
+                // ERROU!
+                sfx.error();
+                state.strikes++;
+                updateHUD();
+
+                const card = document.getElementById('challenge-card');
+                card.classList.remove('animate-shake');
+                void card.offsetWidth; // Reinicia animação
+                card.classList.add('animate-shake');
+
+                let errorHint = '';
+                if (!typeCorrect && !valueCorrect) {
+                    errorHint = `Tipo incorreto (era ${c.type}) e valor incorreto. ${c.explanation}`;
+                } else if (!typeCorrect) {
+                    errorHint = `O valor da razão estava certo, mas a sequência é uma ${c.type}!`;
+                } else {
+                    errorHint = `Valor incorreto. ${c.explanation}`;
+                }
+
+                showFeedback(false, errorHint);
+
+                if (state.strikes >= state.maxStrikes) {
+                    clearInterval(state.timerInterval);
+                    sfx.explosion();
+                    setTimeout(() => {
+                        endGame(false, 'SOBRECARGA CRÍTICA! Você atingiu o limite de 3 falhas no sistema de segurança.');
+                    }, 1300);
+                } else {
+                    // Gera um novo desafio equivalente na mesma trava para manter o treino dinâmico
+                    state.isTransitioning = true;
+                    setTimeout(() => {
+                        loadNextChallenge();
+                    }, 2100);
+                }
+            }
+        }
+
+        function endGame(isVictory, subtitle) {
+            document.getElementById('screen-game').classList.add('hidden');
+            document.getElementById('screen-end').classList.remove('hidden');
+
+            const iconBox = document.getElementById('end-icon-container');
+            const titleEl = document.getElementById('end-title');
+            const subEl = document.getElementById('end-subtitle');
+            const lessonBox = document.getElementById('end-lesson-box');
+
+            const accuracy = state.totalAttempts > 0 
+                ? Math.round((state.correctAnswers / state.totalAttempts) * 100) 
+                : 0;
+
+            const clearedAreas = isVictory ? 3 : (state.currentArea - 1);
+
+            document.getElementById('stat-areas').textContent = `${clearedAreas}/3`;
+            document.getElementById('stat-time').textContent = formatTime(Math.max(0, state.timeLeft));
+            document.getElementById('stat-accuracy').textContent = `${accuracy}%`;
+
+            if (isVictory) {
+                document.getElementById('status-led').className = 'w-3.5 h-3.5 rounded-full bg-emerald-500 shadow-[0_0_12px_#10b981]';
+                iconBox.className = 'inline-flex items-center justify-center w-20 h-20 rounded-2xl mx-auto bg-emerald-500/15 border border-emerald-500/50 text-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.25)]';
+                iconBox.innerHTML = `<svg class="w-11 h-11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>`;
+                titleEl.className = 'text-2xl sm:text-4xl font-extrabold tracking-tight text-emerald-400';
+                titleEl.textContent = 'SISTEMA DESARMADO!';
+                lessonBox.classList.add('hidden');
+            } else {
+                document.getElementById('status-led').className = 'w-3.5 h-3.5 rounded-full bg-red-600 shadow-[0_0_12px_#ef4444]';
+                iconBox.className = 'inline-flex items-center justify-center w-20 h-20 rounded-2xl mx-auto bg-red-500/15 border border-red-500/50 text-red-400 shadow-[0_0_30px_rgba(239,68,68,0.25)]';
+                iconBox.innerHTML = `<svg class="w-11 h-11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+                titleEl.className = 'text-2xl sm:text-4xl font-extrabold tracking-tight text-red-400';
+                titleEl.textContent = 'FALHA NA CONTENÇÃO';
+                
+                if (state.currentChallenge) {
+                    lessonBox.classList.remove('hidden');
+                    document.getElementById('end-lesson-text').textContent = state.currentChallenge.explanation;
+                }
+            }
+
+            subEl.textContent = subtitle;
+        }
+    </script>
+</body>
+</html>
